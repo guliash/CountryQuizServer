@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <title>Create question</title>
+    </head>
+
+    <body>
+        <form enctype="multipart/form-data" action="{% url 'questions:create' %}" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <p><input type="submit" value="Create"/></p>
+        </form>
+    </body>
+</html>

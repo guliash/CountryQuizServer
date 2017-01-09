@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>All</title>
+    </head>
+    <body>
+        {% for question in questions %}
+            <h2>{{ question.name }}</h2>
+            <p><span>{{ question.description }}</span></p>
+            <p><span>{{ question.publish_date }}</span></p>
+            {% if question.image %}
+                <img src="{{ question.image.url }}"/>
+            {% else %}
+                <p><span>No image provided :( </span></p>
+            {% endif %}
+        {% endfor %}
+    </body>
+</html>
