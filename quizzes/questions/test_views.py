@@ -71,6 +71,5 @@ def testImage():
 
 def removeTestImage(image_name):
     path = MEDIA_ROOT + image_name;
-    print(path)
     if os.path.exists(path):
         os.remove(path)
