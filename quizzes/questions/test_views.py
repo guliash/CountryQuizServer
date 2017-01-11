@@ -12,12 +12,12 @@ TEST_IMAGE_PATH = MEDIA_ROOT + 'test/test.png'
 
 class CreateTestCase(TestCase):
 
-    def test_get_found(self):
+    def test_get__returns(self):
         response = self.client.get(reverse('questions:create'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Create question')
 
-    def test_post_creates(self):
+    def test_post__creates(self):
         response = self.client.post(reverse('questions:create'), {'name': 'test_name', 'description': 'test_description', 'image': testImage()})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('questions:question', args=[1]))
@@ -30,14 +30,14 @@ class CreateTestCase(TestCase):
 
 class ViewTestCase(TestCase):
 
-    def test_404_if_not_found(self):
+    def test_question_not_exists__not_found(self):
         question = createQuestion('name', 'description', timezone.now(), 'image')
         question.save()
         response = self.client.get(reverse('questions:question', args=[2]))
         self.assertEqual(response.status_code, 404)
         removeTestImage(question.image.name)
 
-    def test_returns_if_question_present(self):
+    def test_question_exists__returns(self):
         question = createQuestion('name', 'description', timezone.now(), 'test')
         question.save()
         response = self.client.get(reverse('questions:question', args=[1]))
@@ -47,7 +47,7 @@ class ViewTestCase(TestCase):
         removeTestImage(question.image.name)
 
 class ViewAllTestCase(TestCase):
-    def test_shows_all_questions(self):
+    def test__shows_all_questions(self):
         question1 = createQuestion('first', 'first_desc', timezone.now(), 'first')
         question2 = createQuestion('second', 'second_desc', timezone.now(), 'second')
         question1.save()
