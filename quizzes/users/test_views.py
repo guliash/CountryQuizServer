@@ -50,6 +50,17 @@ class SigninTestCase(TestCase):
 
         self.assertEqual(response.status_code, 302)
 
+    def test_post_correct_data_and_next__redirects_to_next(self):
+        user = User.objects.create_user('testuser', 'test@example.com',
+                                        '123test123')
+
+        response = self.client.post(reverse('users:signin'),
+            {'username': 'testuser', 'password': '123test123',
+            'next': '/test_url/'})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/test_url/')
+
     def test_get_user_authenticated__redirects(self):
         user = User.objects.create_user('testuser', 'test@example.com',
                                         '123test123')
@@ -59,6 +70,23 @@ class SigninTestCase(TestCase):
         response = self.client.get(reverse('users:signin'))
 
         self.assertEqual(response.status_code, 302)
+
+    def test_get_user_authenticated_next__redirects_to_next(self):
+        user = User.objects.create_user('testuser', 'test@example.com',
+                                        '123test123')
+
+        self.client.login(username = 'testuser', password = '123test123')
+
+        response = self.client.get("%s?next=/test_url/" % reverse('users:signin'))
+
+        self.assertEqual(response.status_code, 302);
+        self.assertEqual(response.url, '/test_url/')
+
+    def test_get_with_next__has_next(self):
+        response = self.client.get("%s?next=/test_url/" % reverse('users:signin'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '/test_url/', 1)
 
 class LogoutTestCase(TestCase):
     def test_get__returns(self):

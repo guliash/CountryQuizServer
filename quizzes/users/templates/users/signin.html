@@ -6,6 +6,7 @@
     <form action="{% url 'users:signin' %}" method="post">
       {% csrf_token %}
       {{ form.as_p }}
+      <input type="hidden" name="next" value="{{ next }}"/>
       <p><input type="submit" value="Signin"/></p>
     </form>
   </body>

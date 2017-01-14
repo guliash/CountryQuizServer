@@ -25,8 +25,16 @@ def signup(request):
     return render(request, 'users/signup.html', {'form': form})
 
 def signin(request):
+    next_get = request.GET.get('next')
+    next_post = request.POST.get('next')
+    redirect_url = reverse('questions:all');
+    if next_get:
+        redirect_url = next_get
+    if next_post:
+        redirect_url = next_post
+
     if request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('questions:all'))
+        return HttpResponseRedirect(redirect_url)
     if request.method == 'POST':
         form = SigninForm(request.POST)
         if form.is_valid():
@@ -34,12 +42,12 @@ def signin(request):
                                 password = form.cleaned_data['password'])
             if user is not None:
                 login(request, user)
-                return HttpResponseRedirect(reverse('questions:all'))
+                return HttpResponseRedirect(redirect_url)
             else:
                 form.add_error('username', _("Can't find user"))
     else:
         form = SigninForm()
-    return render(request, 'users/signin.html', {'form': form})
+    return render(request, 'users/signin.html', {'form': form, 'next': redirect_url})
 
 def logout_view(request):
     logout(request)
