@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+  <head>
+    <title>Signin</title>
+  </head>
+  <body>
+    <form action="{% url 'users:signin' %}" method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <p><input type="submit" value="Signin"/></p>
+    </form>
+  </body>
+</html>
