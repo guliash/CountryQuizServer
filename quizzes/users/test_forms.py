@@ -25,4 +25,16 @@ class SignupFormTestCase(TestCase):
         data = {'name': 'test', 'email': 'test@example.com', 'password': 'test'}
         form = SignupForm(data)
         self.assertFalse(form.is_valid())
-        self.assertTrue(form.has_error('password', 'invalid'))
+        self.assertTrue(form.has_error('password', 'password_too_short'))
+
+    def test_only_digits_password__not_valud(self):
+        data = {'name': 'test', 'email': 'test@example.com', 'password': '123'}
+        form = SignupForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertTrue(form.has_error('password', 'password_entirely_numeric'))
+
+    def test_common_password__not_valid(self):
+        data = {'name': 'test', 'email': 'test@example.com', 'password': 'password'}
+        form = SignupForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertTrue(form.has_error('password', 'password_too_common'))
