@@ -2,8 +2,11 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.auth.models import User, Group, Permission
 
 from .models import Question
+from users import test_utils
+
 from quizzes.settings import MEDIA_ROOT
 
 import os
@@ -11,13 +14,34 @@ import os
 TEST_IMAGE_PATH = MEDIA_ROOT + 'test/test.png'
 
 class CreateTestCase(TestCase):
+    def setUp(self):
+        group = Group.objects.create(name='questions_moderators')
+        group.permissions.add(Permission.objects.get(codename='add_question'))
+        group.save()
 
-    def test_get__returns(self):
+    def test_get_user_has_permission__200(self):
+        user = test_utils.create_test_user()
+        self.add_to_moderators(user)
+
+        self.client.login(username=user.username, password=test_utils.PASSWORD)
         response = self.client.get(reverse('questions:create'))
+
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Create question')
+
+    def test_get_user_has_no_permission__403(self):
+        user = test_utils.create_test_user()
+
+        self.client.login(username=user.username, password=test_utils.PASSWORD)
+        response = self.client.get(reverse('questions:create'))
+
+        self.assertEqual(response.status_code, 403)
 
     def test_post__creates(self):
+        user = test_utils.create_test_user()
+        self.add_to_moderators(user)
+
+        self.client.login(username=user.username, password=test_utils.PASSWORD)
+
         response = self.client.post(reverse('questions:create'), {'name': 'test_name', 'description': 'test_description', 'image': testImage()})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('questions:question', args=[1]))
@@ -27,19 +51,31 @@ class CreateTestCase(TestCase):
         self.assertEqual(question.description, 'test_description')
         removeTestImage(question.image.name)
 
+    def add_to_moderators(self, user):
+        group = Group.objects.get(name='questions_moderators')
+        user.groups.add(group)
+
 
 class ViewTestCase(TestCase):
 
     def test_question_not_exists__not_found(self):
+        user = test_utils.create_test_user()
+        self.client.login(username=user.username, password=test_utils.PASSWORD)
+
         question = createQuestion('name', 'description', timezone.now(), 'image')
         question.save()
+
         response = self.client.get(reverse('questions:question', args=[2]))
         self.assertEqual(response.status_code, 404)
         removeTestImage(question.image.name)
 
     def test_question_exists__returns(self):
+        user = test_utils.create_test_user()
+        self.client.login(username=user.username, password=test_utils.PASSWORD)
+
         question = createQuestion('name', 'description', timezone.now(), 'test')
         question.save()
+
         response = self.client.get(reverse('questions:question', args=[1]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, question.name)
@@ -48,6 +84,9 @@ class ViewTestCase(TestCase):
 
 class ViewAllTestCase(TestCase):
     def test__shows_all_questions(self):
+        user = test_utils.create_test_user()
+        self.client.login(username=user.username, password=test_utils.PASSWORD)
+
         question1 = createQuestion('first', 'first_desc', timezone.now(), 'first')
         question2 = createQuestion('second', 'second_desc', timezone.now(), 'second')
         question1.save()

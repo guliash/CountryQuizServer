@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 
 from .forms import CreateForm
 from .models import Question
@@ -12,6 +12,7 @@ def index(request):
     return HttpResponse("Hello, world. You're at the questions index")
 
 @login_required
+@permission_required('questions.add_question', raise_exception=True)
 def create(request):
     if request.method == 'POST':
         form = CreateForm(request.POST, request.FILES)
