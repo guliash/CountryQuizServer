@@ -4,4 +4,4 @@ python:
 env:
   - DJANGO_VERSION=1.10.5
 install: "pip install -q Django==$DJANGO_VERSION"
-script: python ./quizzes/manage.py test
+script: cd quizzes/ && python manage.py test && cd ..
