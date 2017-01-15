@@ -3,5 +3,5 @@ python:
   - "3.6"
 env:
   - DJANGO_VERSION=1.10.5
-install: "pip install -q Django==$DJANGO_VERSION"
+install: "pip install -q Django==$DJANGO_VERSION && pip install pillow"
 script: cd quizzes/ && python manage.py test && cd ..
