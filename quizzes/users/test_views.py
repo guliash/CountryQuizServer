@@ -3,9 +3,12 @@ from django.urls import reverse
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 
+from users import test_utils
+
 class SignupTestCase(TestCase):
     def test_get__returns(self):
         response = self.client.get(reverse('users:signup'))
+
         self.assertEqual(response.status_code, 200)
 
     def test_post_correct_data__redirects_to_questions(self):
@@ -13,6 +16,7 @@ class SignupTestCase(TestCase):
             reverse('users:signup'),
             {'username': 'testuser', 'password': 'test123test',
                 'email': 'test@example.com'})
+
         self.assertEqual(response.status_code, 302)
 
     def test_post_not_correct_data__200(self):
@@ -23,9 +27,7 @@ class SignupTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_get_user_authenticated__redirects(self):
-        user = User.objects.create_user('testuser', 'test@example.com',
-                                        '123test123')
-        self.client.login(username = 'testuser', password = '123test123')
+        test_utils.create_and_login_test_user(self.client)
 
         response = self.client.get(reverse('users:signup'))
 
@@ -34,6 +36,7 @@ class SignupTestCase(TestCase):
 class SigninTestCase(TestCase):
     def test_get__returns(self):
         response = self.client.get(reverse('users:signin'))
+
         self.assertEqual(response.status_code, 200)
 
     def test_post_not_correct_data__200(self):
@@ -42,40 +45,33 @@ class SigninTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_post_correct_data__302(self):
-        user = User.objects.create_user('testuser', 'test@example.com',
-                                        '123test123')
+        user = test_utils.create_test_user()
 
         response = self.client.post(reverse('users:signin'),
-            {'username': 'testuser', 'password': '123test123'})
+            {'username': user.username, 'password': test_utils.PASSWORD})
 
         self.assertEqual(response.status_code, 302)
 
     def test_post_correct_data_and_next__redirects_to_next(self):
-        user = User.objects.create_user('testuser', 'test@example.com',
-                                        '123test123')
+        user = test_utils.create_test_user()
 
-        response = self.client.post(reverse('users:signin'),
-            {'username': 'testuser', 'password': '123test123',
-            'next': '/test_url/'})
+        response = self.client.post(
+            reverse('users:signin'),
+            {'username': user.username, 'password': test_utils.PASSWORD,
+                'next': '/test_url/'})
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, '/test_url/')
 
     def test_get_user_authenticated__redirects(self):
-        user = User.objects.create_user('testuser', 'test@example.com',
-                                        '123test123')
-
-        self.client.login(username = 'testuser', password = '123test123')
+        test_utils.create_and_login_test_user(self.client)
 
         response = self.client.get(reverse('users:signin'))
 
         self.assertEqual(response.status_code, 302)
 
     def test_get_user_authenticated_next__redirects_to_next(self):
-        user = User.objects.create_user('testuser', 'test@example.com',
-                                        '123test123')
-
-        self.client.login(username = 'testuser', password = '123test123')
+        test_utils.create_and_login_test_user(self.client)
 
         response = self.client.get("%s?next=/test_url/" % reverse('users:signin'))
 
